@@ -783,6 +783,21 @@ class Server(object):
 		                     default_max_body_size=self._settings.getInt(["server", "maxSize"]),
 		                     xheaders=True,
 		                     trusted_downstream=trusted_downstream)
+
+		# Optional SSL/TLS certificate settings for connecting to OctoPrint server through a secure HTTPS connection.
+		cert_file = self._settings.get(["server", "sslCertificate", "certfile"])
+		key_file = self._settings.get(["server", "sslCertificate", "keyfile"])
+		
+		if cert_file is not None and key_file is not None:
+			if os.path.exists(cert_file) and os.path.exists(key_file):
+				server_kwargs.update(dict(ssl_options={"certfile":cert_file,
+													   "keyfile":key_file}))
+				self._logger.info("HTTPS secure SSL/TLS connection is enabled...Found SSL certificate and private key files.\n   SSL Certificate File: " + cert_file + "\n   SSL Private Key File: " + key_file)			
+			else:
+				self._logger.warn("HTTPS secure SSL/TLS connection disabled, SSL certificate and private key files not found. Check the file paths in config.yaml")
+		else:
+			self._logger.info("Not using a secure https connection, no SSL/TLS certificate settings detected in config.yaml")
+		
 		if sys.platform == "win32":
 			# set 10min idle timeout under windows to hopefully make #2916 less likely
 			server_kwargs.update(dict(idle_connection_timeout=600))

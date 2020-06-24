@@ -40,3 +40,7 @@ venv34
 venv35
 venv36
 venv37
+venv38
+
+.vscode
+.eggs
